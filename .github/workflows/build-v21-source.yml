@@ -24,7 +24,11 @@ jobs:
       - name: Install build dependencies and repo
         run: |
           sudo apt-get update
-          sudo apt-get install -y             bc bison build-essential ccache curl flex g++-multilib gcc-multilib git git-lfs             gnupg gperf imagemagick lib32ncurses-dev lib32readline-dev lib32z1-dev             libelf-dev liblz4-tool libncurses5-dev libsdl1.2-dev libssl-dev libxml2             libxml2-utils lzop pngcrush rsync schedtool squashfs-tools xsltproc zip zlib1g-dev
+          sudo apt-get install -y \
+            bc bison build-essential ccache curl flex g++-multilib gcc-multilib git git-lfs \
+            gnupg gperf imagemagick lib32ncurses-dev lib32readline-dev lib32z1-dev \
+            libelf-dev liblz4-tool libncurses5-dev libsdl1.2-dev libssl-dev libxml2 \
+            libxml2-utils lzop pngcrush rsync schedtool squashfs-tools xsltproc zip zlib1g-dev
           mkdir -p "$HOME/bin"
           curl -fsSL https://storage.googleapis.com/git-repo-downloads/repo -o "$HOME/bin/repo"
           chmod +x "$HOME/bin/repo"
@@ -34,27 +38,48 @@ jobs:
         run: |
           mkdir "$GITHUB_WORKSPACE/twrp"
           cd "$GITHUB_WORKSPACE/twrp"
-          repo init --depth=1             -u https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git             -b twrp-12.1
+          repo init --depth=1 \
+            -u https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git \
+            -b twrp-12.1
           repo sync -c --force-sync --no-clone-bundle --no-tags -j2
+
+      - name: Pin bootable recovery to v20 UI ABI
+        run: |
+          cd "$GITHUB_WORKSPACE/twrp/bootable/recovery"
+          git fetch --depth=1 https://github.com/TeamWin/android_bootable_recovery.git \
+            dbed985d1ccb9412fd19171a3ecfb621bb9d0a6b
+          git checkout --detach FETCH_HEAD
+          echo "Pinned bootable/recovery to:"
+          git log -1 --oneline
+          test "$(git rev-parse HEAD)" = "dbed985d1ccb9412fd19171a3ecfb621bb9d0a6b"
 
       - name: Add M127F DXJ3 device tree
         run: |
           cd "$GITHUB_WORKSPACE/twrp"
           rm -rf device/samsung/m12
-          git clone --depth=1             --branch m12nsxx-user-13-TP1A.220624.014-M127FXXS9DXJ3-release-keys             https://github.com/twrpdtgen/android_device_samsung_m12.git             device/samsung/m12
+          git clone --depth=1 \
+            --branch m12nsxx-user-13-TP1A.220624.014-M127FXXS9DXJ3-release-keys \
+            https://github.com/twrpdtgen/android_device_samsung_m12.git \
+            device/samsung/m12
 
           mv device/samsung/m12/omni_m12.mk device/samsung/m12/twrp_m12.mk
-          sed -i 's/vendor\/omni\/config\/common.mk/vendor\/twrp\/config\/common.mk/g'             device/samsung/m12/twrp_m12.mk
-          sed -i 's/PRODUCT_NAME := omni_m12/PRODUCT_NAME := twrp_m12/g'             device/samsung/m12/twrp_m12.mk
-          sed -i 's/omni_m12.mk/twrp_m12.mk/g; s/omni_m12/twrp_m12/g'             device/samsung/m12/AndroidProducts.mk device/samsung/m12/vendorsetup.sh || true
+          sed -i 's/vendor\/omni\/config\/common.mk/vendor\/twrp\/config\/common.mk/g' \
+            device/samsung/m12/twrp_m12.mk
+          sed -i 's/PRODUCT_NAME := omni_m12/PRODUCT_NAME := twrp_m12/g' \
+            device/samsung/m12/twrp_m12.mk
+          sed -i 's/omni_m12.mk/twrp_m12.mk/g; s/omni_m12/twrp_m12/g' \
+            device/samsung/m12/AndroidProducts.mk device/samsung/m12/vendorsetup.sh || true
 
       - name: Install direct-HIDL Keymaster vold base
         run: |
           cd "$GITHUB_WORKSPACE/twrp"
           rm -rf system/vold
-          git clone --depth=1 --branch twrp-12.1             https://github.com/4accccc/android_system_vold.git system/vold
+          git clone --depth=1 --branch twrp-12.1 \
+            https://github.com/4accccc/android_system_vold.git system/vold
 
-          curl -fsSL             https://raw.githubusercontent.com/TeamWin/android_system_vold/a164ba05c5fef288059774a776b2e6e1119957cf/Decrypt.cpp             -o system/vold/Decrypt.cpp
+          curl -fsSL \
+            https://raw.githubusercontent.com/TeamWin/android_system_vold/a164ba05c5fef288059774a776b2e6e1119957cf/Decrypt.cpp \
+            -o system/vold/Decrypt.cpp
 
       - name: Apply v21 HAT + legacy scrypt patch
         run: |
@@ -72,10 +97,6 @@ jobs:
           ccache -M 5G
           source build/envsetup.sh
           lunch twrp_m12-eng
-
-          # Build only the recovery executable/module.  Do NOT build recoveryimage:
-          # the generated full source-tree image is larger than this device's
-          # recovery partition, and we only need the executable to inject into v20.
           mka recovery -j2
 
           REC="out/target/product/m12/recovery/root/system/bin/recovery"
@@ -90,14 +111,21 @@ jobs:
 
       - name: Reassemble known-good v20
         run: |
-          python3 scripts/reassemble_base.py             --manifest base/v20/manifest.json             --output v20-base.img
+          python3 scripts/reassemble_base.py \
+            --manifest base/v20/manifest.json \
+            --output v20-base.img
 
       - name: Inject v21 recovery into v20
         run: |
           mkdir -p dist
-          python3 scripts/repack_with_recovery.py             --base v20-base.img             --recovery-bin recovery-v21             --output dist/M127F_DXJ1_TWRP_crypto_test_v21_hat_ce_auth.img
-          python3 scripts/verify_bootimg.py             dist/M127F_DXJ1_TWRP_crypto_test_v21_hat_ce_auth.img
-          sha256sum dist/M127F_DXJ1_TWRP_crypto_test_v21_hat_ce_auth.img             | tee dist/SHA256SUMS.txt
+          python3 scripts/repack_with_recovery.py \
+            --base v20-base.img \
+            --recovery-bin recovery-v21 \
+            --output dist/M127F_DXJ1_TWRP_crypto_test_v21_hat_ce_auth.img
+          python3 scripts/verify_bootimg.py \
+            dist/M127F_DXJ1_TWRP_crypto_test_v21_hat_ce_auth.img
+          sha256sum dist/M127F_DXJ1_TWRP_crypto_test_v21_hat_ce_auth.img \
+            | tee dist/SHA256SUMS.txt
           cp recovery-v21 dist/recovery-v21.elf
 
       - name: Upload v21
