@@ -14,6 +14,8 @@ def main():
     p = Path(sys.argv[1]) / "VoldNativeService.cpp"
     s = p.read_text()
 
+    # Android 12 upstream removed HAT support and rejects non-empty token
+    # parameters. v21 restores token+secret plumbing, so remove those guards.
     blocks = [
         "    if (!token_empty(token)) {\n"
         "        LOG(ERROR) << \"Vold doesn't use auth tokens, but non-empty token passed to addUserKeyAuth.\";\n"
@@ -31,7 +33,6 @@ def main():
         "        return binder::Status::fromServiceSpecificError(-EINVAL);\n"
         "    }\n\n",
     ]
-
     for block in blocks:
         if block in s:
             s = s.replace(block, "", 1)
@@ -55,8 +56,18 @@ def main():
         "unlockUserKey",
     )
 
+    # After the three guards above are removed, this helper has no callers.
+    # The tree builds with -Werror, so leaving it triggers -Wunused-function.
+    helper = (
+        "static bool token_empty(const std::string& token) {\n"
+        "    return token.size() == 0 || token == \"!\";\n"
+        "}\n\n"
+    )
+    if helper in s:
+        s = s.replace(helper, "", 1)
+
     p.write_text(s)
-    print("v21 fix2: patched VoldNativeService token plumbing")
+    print("v21 fix3: restored token plumbing and removed unused token_empty helper")
 
 if __name__ == "__main__":
     main()
