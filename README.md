@@ -68,3 +68,10 @@ Output is written to `dist/`.
 This project is for recovery development. It must not delete or reset EFS,
 Gatekeeper state, locksettings, synthetic-password blobs, Keymaster blobs, or
 CE key files as a decryption workaround.
+
+## v21 source workflow
+
+Use **Actions → Build v21 source recovery → Run workflow**.
+
+This workflow builds a patched recovery executable from TWRP 12.1 sources and
+injects it into the known-good v20 image, producing a complete flashable v21 `.img`.
