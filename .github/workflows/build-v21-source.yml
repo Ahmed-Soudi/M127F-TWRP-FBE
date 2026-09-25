@@ -74,6 +74,7 @@ jobs:
       - name: Apply v21 HAT + legacy scrypt patch
         run: |
           python3 "$GITHUB_WORKSPACE/source/patch_v21.py" "$GITHUB_WORKSPACE/twrp/system/vold"
+          python3 "$GITHUB_WORKSPACE/source/fix_v21_vold_native.py" "$GITHUB_WORKSPACE/twrp/system/vold"
           grep -R -n "v21:" "$GITHUB_WORKSPACE/twrp/system/vold" | head -80
 
       - name: Build patched recovery
