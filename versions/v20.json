@@ -1,0 +1,7 @@
+{
+  "version": "v20",
+  "base": "v20",
+  "output": "M127F_DXJ1_TWRP_crypto_test_v20_ce_keymaster_fast_pin.img",
+  "description": "Known booting v20 base: EFS fix + scrypt 15:3:1 compatibility + CE Keymaster path + fast PIN screen.",
+  "patch_script": null
+}

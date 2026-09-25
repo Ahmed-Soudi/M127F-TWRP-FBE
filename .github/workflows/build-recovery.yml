@@ -1,0 +1,55 @@
+name: Build M127F TWRP image
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version to build (currently v20; v21 is scaffolded until the HAT patch is committed)
+        required: true
+        default: v20
+        type: string
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select version
+        id: ver
+        shell: bash
+        run: |
+          if [[ "${GITHUB_EVENT_NAME}" == "workflow_dispatch" ]]; then
+            echo "version=${{ inputs.version }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build complete recovery image
+        run: |
+          python3 scripts/build_image.py --version "${{ steps.ver.outputs.version }}"
+
+      - name: Upload recovery image artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: M127F-TWRP-${{ steps.ver.outputs.version }}
+          path: |
+            dist/*.img
+            dist/SHA256SUMS.txt
+            dist/build-info.json
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: Publish tag as GitHub Release
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME"             dist/*.img dist/SHA256SUMS.txt dist/build-info.json             --title "$GITHUB_REF_NAME"             --generate-notes

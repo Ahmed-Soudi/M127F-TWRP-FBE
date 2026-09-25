@@ -1,0 +1,25 @@
+{
+  "device": "Samsung Galaxy M12 SM-M127F",
+  "android_stock": "Android 13",
+  "base_version": "v20",
+  "output_filename": "M127F_DXJ1_TWRP_crypto_test_v20_ce_keymaster_fast_pin.img",
+  "size": 54814720,
+  "sha256": "9d8e4c6889adc7381cc1edc35e12ff4460672324216face7a551ade30b4f5a74",
+  "parts": [
+    {
+      "file": "base/v20/part-000.bin",
+      "size": 18874368,
+      "sha256": "4338c852e29a0219e979468c05d6b0266d8e74c94c9690fee3a67231fe66621d"
+    },
+    {
+      "file": "base/v20/part-001.bin",
+      "size": 18874368,
+      "sha256": "eeeb304235d2067bd371602c03f41d22d9c3a29a813b435db7fbbdeb0e17c915"
+    },
+    {
+      "file": "base/v20/part-002.bin",
+      "size": 17065984,
+      "sha256": "6aa64837dc920fc99e7fadef5aac16cd81a62e9615f90590188b16f2c8cb8e96"
+    }
+  ]
+}

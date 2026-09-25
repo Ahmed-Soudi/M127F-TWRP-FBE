@@ -1,0 +1,19 @@
+UPLOAD THESE FILES/FOLDERS TO THE ROOT OF YOUR EMPTY GITHUB REPOSITORY:
+
+.github/
+base/
+patches/
+scripts/
+versions/
+.gitignore
+README.md
+
+You do NOT need to upload this UPLOAD-ME.txt file.
+
+Important:
+- Extract the ZIP first.
+- Upload the CONTENTS of the M127F-TWRP-FBE folder, not the outer folder itself.
+- Keep the directory structure exactly as shown.
+- The base image is split into parts under base/v20/ so GitHub's browser uploader
+  can accept them.
+- After upload, open Actions -> Build M127F TWRP image -> Run workflow -> version v20.

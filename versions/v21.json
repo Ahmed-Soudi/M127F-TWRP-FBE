@@ -1,0 +1,8 @@
+{
+  "version": "v21",
+  "base": "v20",
+  "output": "M127F_DXJ1_TWRP_crypto_test_v21_hat_ce_auth.img",
+  "description": "Reserved for Gatekeeper HAT propagation into CE KeyStorage/Keymaster retrieval.",
+  "patch_script": "patches/v21/apply.py",
+  "status": "scaffold"
+}
