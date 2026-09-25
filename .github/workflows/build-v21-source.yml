@@ -57,7 +57,7 @@ jobs:
             device/samsung/m12/twrp_m12.mk
           sed -i 's/PRODUCT_NAME := omni_m12/PRODUCT_NAME := twrp_m12/g' \
             device/samsung/m12/twrp_m12.mk
-          sed -i 's/omni_m12.mk/twrp_m12.mk/g; s/omni_m12-eng/twrp_m12-eng/g' \
+          sed -i 's/omni_m12.mk/twrp_m12.mk/g; s/omni_m12/twrp_m12/g' \
             device/samsung/m12/AndroidProducts.mk device/samsung/m12/vendorsetup.sh || true
 
       - name: Install direct-HIDL Keymaster vold base
