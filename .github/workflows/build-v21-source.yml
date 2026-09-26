@@ -69,26 +69,26 @@ jobs:
           sed -i 's/omni_m12.mk/twrp_m12.mk/g; s/omni_m12/twrp_m12/g' \
             device/samsung/m12/AndroidProducts.mk device/samsung/m12/vendorsetup.sh || true
 
-          cat >> device/samsung/m12/BoardConfig.mk <<'EOF'
-TARGET_SCREEN_WIDTH := 720
-TARGET_SCREEN_HEIGHT := 1600
-TW_THEME := portrait_hdpi
-
-# Compatibility bridge for pinned dbed985d recovery Go plugin.
-SOONG_CONFIG_NAMESPACES += makeVarsPlugin
-SOONG_CONFIG_makeVarsPlugin += TW_THEME
-SOONG_CONFIG_makeVarsPlugin += TARGET_SCREEN_WIDTH
-SOONG_CONFIG_makeVarsPlugin += TARGET_SCREEN_HEIGHT
-SOONG_CONFIG_makeVarsPlugin += TW_EXTRA_LANGUAGES
-SOONG_CONFIG_makeVarsPlugin += TW_SCREEN_BLANK_ON_BOOT
-SOONG_CONFIG_makeVarsPlugin += TW_INPUT_BLACKLIST
-SOONG_CONFIG_makeVarsPlugin_TW_THEME := $(TW_THEME)
-SOONG_CONFIG_makeVarsPlugin_TARGET_SCREEN_WIDTH := $(TARGET_SCREEN_WIDTH)
-SOONG_CONFIG_makeVarsPlugin_TARGET_SCREEN_HEIGHT := $(TARGET_SCREEN_HEIGHT)
-SOONG_CONFIG_makeVarsPlugin_TW_EXTRA_LANGUAGES := $(TW_EXTRA_LANGUAGES)
-SOONG_CONFIG_makeVarsPlugin_TW_SCREEN_BLANK_ON_BOOT := $(TW_SCREEN_BLANK_ON_BOOT)
-SOONG_CONFIG_makeVarsPlugin_TW_INPUT_BLACKLIST := $(TW_INPUT_BLACKLIST)
-EOF
+          printf '%s\n' \
+            'TARGET_SCREEN_WIDTH := 720' \
+            'TARGET_SCREEN_HEIGHT := 1600' \
+            'TW_THEME := portrait_hdpi' \
+            '' \
+            '# Compatibility bridge for pinned dbed985d recovery Go plugin.' \
+            'SOONG_CONFIG_NAMESPACES += makeVarsPlugin' \
+            'SOONG_CONFIG_makeVarsPlugin += TW_THEME' \
+            'SOONG_CONFIG_makeVarsPlugin += TARGET_SCREEN_WIDTH' \
+            'SOONG_CONFIG_makeVarsPlugin += TARGET_SCREEN_HEIGHT' \
+            'SOONG_CONFIG_makeVarsPlugin += TW_EXTRA_LANGUAGES' \
+            'SOONG_CONFIG_makeVarsPlugin += TW_SCREEN_BLANK_ON_BOOT' \
+            'SOONG_CONFIG_makeVarsPlugin += TW_INPUT_BLACKLIST' \
+            'SOONG_CONFIG_makeVarsPlugin_TW_THEME := $(TW_THEME)' \
+            'SOONG_CONFIG_makeVarsPlugin_TARGET_SCREEN_WIDTH := $(TARGET_SCREEN_WIDTH)' \
+            'SOONG_CONFIG_makeVarsPlugin_TARGET_SCREEN_HEIGHT := $(TARGET_SCREEN_HEIGHT)' \
+            'SOONG_CONFIG_makeVarsPlugin_TW_EXTRA_LANGUAGES := $(TW_EXTRA_LANGUAGES)' \
+            'SOONG_CONFIG_makeVarsPlugin_TW_SCREEN_BLANK_ON_BOOT := $(TW_SCREEN_BLANK_ON_BOOT)' \
+            'SOONG_CONFIG_makeVarsPlugin_TW_INPUT_BLACKLIST := $(TW_INPUT_BLACKLIST)' \
+            >> device/samsung/m12/BoardConfig.mk
 
       - name: Install direct-HIDL Keymaster vold base
         run: |
