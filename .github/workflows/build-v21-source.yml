@@ -49,7 +49,6 @@ jobs:
           git fetch --depth=1 https://github.com/TeamWin/android_bootable_recovery.git \
             dbed985d1ccb9412fd19171a3ecfb621bb9d0a6b
           git checkout --detach FETCH_HEAD
-          echo "Pinned bootable/recovery to:"
           git log -1 --oneline
           test "$(git rev-parse HEAD)" = "dbed985d1ccb9412fd19171a3ecfb621bb9d0a6b"
 
@@ -70,15 +69,26 @@ jobs:
           sed -i 's/omni_m12.mk/twrp_m12.mk/g; s/omni_m12/twrp_m12/g' \
             device/samsung/m12/AndroidProducts.mk device/samsung/m12/vendorsetup.sh || true
 
-          # The pinned v20-era bootable/recovery uses the older theme selector.
-          # Give it the real panel dimensions so Soong can select portrait_hdpi.
           cat >> device/samsung/m12/BoardConfig.mk <<'EOF'
-          TARGET_SCREEN_WIDTH := 720
-          TARGET_SCREEN_HEIGHT := 1600
-          TW_THEME := portrait_hdpi
-          EOF
+TARGET_SCREEN_WIDTH := 720
+TARGET_SCREEN_HEIGHT := 1600
+TW_THEME := portrait_hdpi
 
-          tail -n 12 device/samsung/m12/BoardConfig.mk
+# Compatibility bridge for pinned dbed985d recovery Go plugin.
+SOONG_CONFIG_NAMESPACES += makeVarsPlugin
+SOONG_CONFIG_makeVarsPlugin += TW_THEME
+SOONG_CONFIG_makeVarsPlugin += TARGET_SCREEN_WIDTH
+SOONG_CONFIG_makeVarsPlugin += TARGET_SCREEN_HEIGHT
+SOONG_CONFIG_makeVarsPlugin += TW_EXTRA_LANGUAGES
+SOONG_CONFIG_makeVarsPlugin += TW_SCREEN_BLANK_ON_BOOT
+SOONG_CONFIG_makeVarsPlugin += TW_INPUT_BLACKLIST
+SOONG_CONFIG_makeVarsPlugin_TW_THEME := $(TW_THEME)
+SOONG_CONFIG_makeVarsPlugin_TARGET_SCREEN_WIDTH := $(TARGET_SCREEN_WIDTH)
+SOONG_CONFIG_makeVarsPlugin_TARGET_SCREEN_HEIGHT := $(TARGET_SCREEN_HEIGHT)
+SOONG_CONFIG_makeVarsPlugin_TW_EXTRA_LANGUAGES := $(TW_EXTRA_LANGUAGES)
+SOONG_CONFIG_makeVarsPlugin_TW_SCREEN_BLANK_ON_BOOT := $(TW_SCREEN_BLANK_ON_BOOT)
+SOONG_CONFIG_makeVarsPlugin_TW_INPUT_BLACKLIST := $(TW_INPUT_BLACKLIST)
+EOF
 
       - name: Install direct-HIDL Keymaster vold base
         run: |
@@ -86,7 +96,6 @@ jobs:
           rm -rf system/vold
           git clone --depth=1 --branch twrp-12.1 \
             https://github.com/4accccc/android_system_vold.git system/vold
-
           curl -fsSL \
             https://raw.githubusercontent.com/TeamWin/android_system_vold/a164ba05c5fef288059774a776b2e6e1119957cf/Decrypt.cpp \
             -o system/vold/Decrypt.cpp
