@@ -70,6 +70,16 @@ jobs:
           sed -i 's/omni_m12.mk/twrp_m12.mk/g; s/omni_m12/twrp_m12/g' \
             device/samsung/m12/AndroidProducts.mk device/samsung/m12/vendorsetup.sh || true
 
+          # The pinned v20-era bootable/recovery uses the older theme selector.
+          # Give it the real panel dimensions so Soong can select portrait_hdpi.
+          cat >> device/samsung/m12/BoardConfig.mk <<'EOF'
+          TARGET_SCREEN_WIDTH := 720
+          TARGET_SCREEN_HEIGHT := 1600
+          TW_THEME := portrait_hdpi
+          EOF
+
+          tail -n 12 device/samsung/m12/BoardConfig.mk
+
       - name: Install direct-HIDL Keymaster vold base
         run: |
           cd "$GITHUB_WORKSPACE/twrp"
