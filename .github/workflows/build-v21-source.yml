@@ -73,6 +73,9 @@ jobs:
             'TARGET_SCREEN_WIDTH := 720' \
             'TARGET_SCREEN_HEIGHT := 1600' \
             'TW_THEME := portrait_hdpi' \
+            'TW_INCLUDE_CRYPTO := true' \
+            'TW_INCLUDE_CRYPTO_FBE := true' \
+            'BOARD_USES_METADATA_PARTITION := true' \
             '' \
             '# Compatibility bridge for pinned dbed985d recovery Go plugin.' \
             'SOONG_CONFIG_NAMESPACES += makeVarsPlugin' \
@@ -81,12 +84,18 @@ jobs:
             'SOONG_CONFIG_makeVarsPlugin += TARGET_SCREEN_HEIGHT' \
             'SOONG_CONFIG_makeVarsPlugin += TW_EXTRA_LANGUAGES' \
             'SOONG_CONFIG_makeVarsPlugin += TW_SCREEN_BLANK_ON_BOOT' \
+            'SOONG_CONFIG_makeVarsPlugin += TW_INCLUDE_CRYPTO' \
+            'SOONG_CONFIG_makeVarsPlugin += TW_INCLUDE_CRYPTO_FBE' \
             'SOONG_CONFIG_makeVarsPlugin_TW_THEME := $(TW_THEME)' \
             'SOONG_CONFIG_makeVarsPlugin_TARGET_SCREEN_WIDTH := $(TARGET_SCREEN_WIDTH)' \
             'SOONG_CONFIG_makeVarsPlugin_TARGET_SCREEN_HEIGHT := $(TARGET_SCREEN_HEIGHT)' \
             'SOONG_CONFIG_makeVarsPlugin_TW_EXTRA_LANGUAGES := $(TW_EXTRA_LANGUAGES)' \
             'SOONG_CONFIG_makeVarsPlugin_TW_SCREEN_BLANK_ON_BOOT := $(TW_SCREEN_BLANK_ON_BOOT)' \
+            'SOONG_CONFIG_makeVarsPlugin_TW_INCLUDE_CRYPTO := $(TW_INCLUDE_CRYPTO)' \
+            'SOONG_CONFIG_makeVarsPlugin_TW_INCLUDE_CRYPTO_FBE := $(TW_INCLUDE_CRYPTO_FBE)' \
             >> device/samsung/m12/BoardConfig.mk
+
+          grep -E 'TW_INCLUDE_CRYPTO|TW_INCLUDE_CRYPTO_FBE|BOARD_USES_METADATA_PARTITION|TW_THEME|TARGET_SCREEN_' device/samsung/m12/BoardConfig.mk | tail -20
 
       - name: Install direct-HIDL Keymaster vold base
         run: |
