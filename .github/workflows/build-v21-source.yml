@@ -118,6 +118,11 @@ jobs:
           python3 "$GITHUB_WORKSPACE/source/fix_v21_metadata_fstab.py" \
             "$GITHUB_WORKSPACE/twrp/bootable/recovery/partitionmanager.cpp"
 
+      - name: Wait for crypto services before metadata decrypt
+        run: |
+          python3 "$GITHUB_WORKSPACE/source/fix_v21_crypto_wait.py" \
+            "$GITHUB_WORKSPACE/twrp/bootable/recovery/partitionmanager.cpp"
+
       - name: Link direct-HIDL Keymaster deps into recovery
         run: |
           python3 source/fix_v21_recovery_link.py "$GITHUB_WORKSPACE/twrp/bootable/recovery/Android.mk"
