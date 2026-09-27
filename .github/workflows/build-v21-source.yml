@@ -113,6 +113,11 @@ jobs:
           python3 "$GITHUB_WORKSPACE/source/fix_v21_vold_native.py" "$GITHUB_WORKSPACE/twrp/system/vold"
           grep -R -n "v21:" "$GITHUB_WORKSPACE/twrp/system/vold" | head -80
 
+      - name: Force recovery fstab for metadata decrypt
+        run: |
+          python3 "$GITHUB_WORKSPACE/source/fix_v21_metadata_fstab.py" \
+            "$GITHUB_WORKSPACE/twrp/bootable/recovery/partitionmanager.cpp"
+
       - name: Link direct-HIDL Keymaster deps into recovery
         run: |
           python3 source/fix_v21_recovery_link.py "$GITHUB_WORKSPACE/twrp/bootable/recovery/Android.mk"
