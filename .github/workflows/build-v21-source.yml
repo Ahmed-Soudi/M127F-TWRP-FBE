@@ -81,13 +81,11 @@ jobs:
             'SOONG_CONFIG_makeVarsPlugin += TARGET_SCREEN_HEIGHT' \
             'SOONG_CONFIG_makeVarsPlugin += TW_EXTRA_LANGUAGES' \
             'SOONG_CONFIG_makeVarsPlugin += TW_SCREEN_BLANK_ON_BOOT' \
-            'SOONG_CONFIG_makeVarsPlugin += TW_INPUT_BLACKLIST' \
             'SOONG_CONFIG_makeVarsPlugin_TW_THEME := $(TW_THEME)' \
             'SOONG_CONFIG_makeVarsPlugin_TARGET_SCREEN_WIDTH := $(TARGET_SCREEN_WIDTH)' \
             'SOONG_CONFIG_makeVarsPlugin_TARGET_SCREEN_HEIGHT := $(TARGET_SCREEN_HEIGHT)' \
             'SOONG_CONFIG_makeVarsPlugin_TW_EXTRA_LANGUAGES := $(TW_EXTRA_LANGUAGES)' \
             'SOONG_CONFIG_makeVarsPlugin_TW_SCREEN_BLANK_ON_BOOT := $(TW_SCREEN_BLANK_ON_BOOT)' \
-            'SOONG_CONFIG_makeVarsPlugin_TW_INPUT_BLACKLIST := $(TW_INPUT_BLACKLIST)' \
             >> device/samsung/m12/BoardConfig.mk
 
       - name: Install direct-HIDL Keymaster vold base
