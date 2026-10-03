@@ -31,9 +31,11 @@ metadata blob is read. Moving metadata operations to direct HIDL removes this
 particular AIDL wait, so explicit synchronization is appropriate.
 
 The latest capture is filtered and has no `metadata_key_dir/key`, key-retrieval,
-or blob-read marker. It cannot identify the exact return branch. Its September
-27 04:37 boot predates the fix11 workflow around 05:00 and likely records fix10;
-it does not demonstrate fix11 or fix12 behavior. The standalone
+or blob-read marker. It cannot identify the exact return branch or source commit.
+The handoff reports the failure as tested through fix11. The displayed September
+27 04:37 device timestamp and fix11's roughly 05:00 workflow timestamp do not
+conclusively identify the image without aligned clocks and an image hash.
+Fix12 remains unconfirmed by the supplied runtime evidence. The standalone
 `v21-recovery.txt` and `v21-logcat.txt` describe an older September 25 build,
 including the already-investigated theme mismatch.
 
