@@ -2,6 +2,16 @@ name: Build v21 source recovery
 
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/build-v21-source.yml'
+      - 'source/**'
+      - 'scripts/repack_with_recovery.py'
+      - 'tests/**'
+
+concurrency:
+  group: v21-source-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -14,6 +24,9 @@ jobs:
     steps:
       - name: Checkout image factory
         uses: actions/checkout@v4
+
+      - name: Validate metadata startup, storage key compatibility, and repack safeguards
+        run: python3 -m unittest discover -s tests -v
 
       - name: Free runner disk
         run: |
@@ -103,6 +116,11 @@ jobs:
           rm -rf system/vold
           git clone --depth=1 --branch twrp-12.1 \
             https://github.com/4accccc/android_system_vold.git system/vold
+          cd system/vold
+          git fetch --depth=1 origin c20fb263dd56dd6e73a48ba5ba7ee8982ab1cf9f
+          git checkout --detach FETCH_HEAD
+          test "$(git rev-parse HEAD)" = "c20fb263dd56dd6e73a48ba5ba7ee8982ab1cf9f"
+          cd ../..
           curl -fsSL \
             https://raw.githubusercontent.com/TeamWin/android_system_vold/a164ba05c5fef288059774a776b2e6e1119957cf/Decrypt.cpp \
             -o system/vold/Decrypt.cpp
@@ -113,15 +131,25 @@ jobs:
           python3 "$GITHUB_WORKSPACE/source/fix_v21_vold_native.py" "$GITHUB_WORKSPACE/twrp/system/vold"
           grep -R -n "v21:" "$GITHUB_WORKSPACE/twrp/system/vold" | head -80
 
-      - name: Force recovery fstab for metadata decrypt
+      - name: Adapt metadata and DE blobs for raw HIDL Keymaster
+        run: |
+          python3 "$GITHUB_WORKSPACE/source/fix_v21_storage_key_compat.py" \
+            "$GITHUB_WORKSPACE/twrp/system/vold"
+
+      - name: Prepare native fs_mgr fstab for metadata decrypt
         run: |
           python3 "$GITHUB_WORKSPACE/source/fix_v21_metadata_fstab.py" \
             "$GITHUB_WORKSPACE/twrp/bootable/recovery/partitionmanager.cpp"
 
-      - name: Wait for crypto services before metadata decrypt
+      - name: Wait for crypto service registration before metadata decrypt
         run: |
           python3 "$GITHUB_WORKSPACE/source/fix_v21_crypto_wait.py" \
             "$GITHUB_WORKSPACE/twrp/bootable/recovery/partitionmanager.cpp"
+
+      - name: Restrict metadata retrieval to existing keys and bounded retries
+        run: |
+          python3 "$GITHUB_WORKSPACE/source/fix_v21_metadata_safety.py" \
+            "$GITHUB_WORKSPACE/twrp/system/vold/MetadataCrypt.cpp"
 
       - name: Link direct-HIDL Keymaster deps into recovery
         run: |
@@ -161,19 +189,19 @@ jobs:
           python3 scripts/repack_with_recovery.py \
             --base v20-base.img \
             --recovery-bin recovery-v21 \
-            --output dist/M127F_DXJ1_TWRP_crypto_test_v21_hat_ce_auth.img
+            --output dist/M127F_DXJ1_TWRP_crypto_test_v21_fix14_storage_key_compat.img
           python3 scripts/verify_bootimg.py \
-            dist/M127F_DXJ1_TWRP_crypto_test_v21_hat_ce_auth.img
-          sha256sum dist/M127F_DXJ1_TWRP_crypto_test_v21_hat_ce_auth.img \
+            dist/M127F_DXJ1_TWRP_crypto_test_v21_fix14_storage_key_compat.img
+          sha256sum dist/M127F_DXJ1_TWRP_crypto_test_v21_fix14_storage_key_compat.img \
             | tee dist/SHA256SUMS.txt
           cp recovery-v21 dist/recovery-v21.elf
 
       - name: Upload v21
         uses: actions/upload-artifact@v4
         with:
-          name: M127F-TWRP-v21-source
+          name: M127F-TWRP-v21-fix14-source
           path: |
-            dist/M127F_DXJ1_TWRP_crypto_test_v21_hat_ce_auth.img
+            dist/M127F_DXJ1_TWRP_crypto_test_v21_fix14_storage_key_compat.img
             dist/SHA256SUMS.txt
             dist/recovery-v21.elf
           if-no-files-found: error
