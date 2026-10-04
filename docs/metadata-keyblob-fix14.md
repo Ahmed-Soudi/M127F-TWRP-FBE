@@ -36,8 +36,10 @@ The Android 12L KeyMint compatibility layer uses a seven-byte public magic
 `pKMblob` followed by an origin byte: 0 for hardware and 1 for software. It
 removes recognized headers before hardware begin/upgrade calls and restores
 the hardware header around returned upgraded blobs. Raw older blobs pass
-through unchanged. The supplied fix13 capture does not itself show whether
-the stored blob has this header; the patch must recognize it explicitly.
+through unchanged. A subsequent read-only check from Android confirmed the
+hardware wrapper on the stored metadata blob. The check printed only
+`KeyMint hardware wrapper present`; no blob bytes were disclosed. The patch
+still recognizes the header explicitly rather than assuming every blob is wrapped.
 
 The hardware upgrade contract also requires application binding parameters.
 The fork's original no-auth begin retries an upgrade with empty parameters,
@@ -74,6 +76,25 @@ key blobs and credentials are not rewritten. No raw HAT or key bytes are logged.
 Fix13's existing-key retrieval, native-fstab validation, registration wait,
 and three pre-mapper attempts remain in place. The v20 repack base and its
 checksum requirements are unchanged.
+
+## Completed build
+
+[Run 37237197492](https://github.com/Ahmed-Soudi/M127F-TWRP-FBE/actions/runs/37237197492)
+completed successfully from source commit
+`4971d8167aabd5b2f691f1d49fa0945d18efa49a`. All 44 regression tests, the
+full Android recovery compile, checksum-verified v20 reassembly, executable-only
+repack, and artifact upload passed.
+
+[Download the fix14 artifact](https://github.com/Ahmed-Soudi/M127F-TWRP-FBE/actions/runs/37237197492/artifacts/11316913858).
+It contains one flashable image, `SHA256SUMS.txt`, and the debug executable
+`recovery-v21.elf`.
+
+- Image: `M127F_DXJ1_TWRP_crypto_test_v21_fix14_storage_key_compat.img`.
+- Image size: 54,944,884 bytes.
+- Image SHA-256: `febd5de30b07304e0909f76af5b05c1fe7d26aab7a68054b001d9691ec66da8b`.
+- v20 base SHA-256: `9d8e4c6889adc7381cc1edc35e12ff4460672324216face7a551ade30b4f5a74`.
+
+Device decryption and the automatic PIN page still require the phone test.
 
 ## Phone-only capture
 
