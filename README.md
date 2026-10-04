@@ -76,12 +76,15 @@ Use **Actions → Build v21 source recovery → Run workflow**.
 This workflow builds a patched recovery executable from TWRP 12.1 sources and
 injects it into the known-good v20 image, producing a complete flashable v21 `.img`.
 
-The current candidate is **v21 fix13: metadata startup**. It fixes the native
-fs_mgr fstab input, waits for crypto service registration, and bounds existing-key
-retrieval retries before creating the metadata mapper. The CE/HAT patch is unchanged.
-See [the evidence and runtime validation steps](docs/metadata-startup-fix13.md).
+The current candidate is **v21 fix14: metadata and DE key compatibility**.
+The fix13 phone capture validates the native fstab and service wait, then fails
+with Samsung Keymaster `INVALID_KEY_BLOB (-33)` before creating the data mapper.
+Fix14 adapts recognized KeyMint hardware blob headers in memory and preserves
+application binding during upgrades, only for metadata and DE storage keys.
+The CE/HAT patch is unchanged. See [the evidence and runtime validation
+steps](docs/metadata-keyblob-fix14.md).
 
 Pull requests changing the source/build path run the regression checks and image
-build automatically. The artifact is `M127F-TWRP-v21-fix13-source`, containing
-`M127F_DXJ1_TWRP_crypto_test_v21_fix13_metadata_startup.img` and `SHA256SUMS.txt`.
+build automatically. The artifact is `M127F-TWRP-v21-fix14-source`, containing
+`M127F_DXJ1_TWRP_crypto_test_v21_fix14_storage_key_compat.img` and `SHA256SUMS.txt`.
 Successful compilation/repacking does not establish device decryption success.
