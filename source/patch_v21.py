@@ -162,7 +162,14 @@ def patch_keystorage_cpp(root):
 
     old_begin = '''    auto opHandle = keymaster.begin(blob, inParams, outParams);
     printf("[DEBUG] BeginKeymasterOp: keymaster.begin() returned, valid=%d\\n", (bool)opHandle);'''
-    new_begin = '''    KeymasterOperation opHandle;
+    new_begin = '''    static const char kKmCompatHwPrefix[8] = {'p', 'K', 'M', 'b', 'l', 'o', 'b', '\\0'};
+    if (blob.size() >= sizeof(kKmCompatHwPrefix) &&
+        memcmp(blob.data(), kKmCompatHwPrefix, sizeof(kKmCompatHwPrefix)) == 0) {
+        LOG(INFO) << "v21: stripping pKMblob HW prefix before raw HIDL Keymaster";
+        blob.erase(0, sizeof(kKmCompatHwPrefix));
+        printf("[DEBUG] BeginKeymasterOp: km_compat HW prefix stripped, inner size=%zu\\n", blob.size());
+    }
+    KeymasterOperation opHandle;
     if (auth != nullptr && !auth->token.empty()) {
         if (auth->token.size() != sizeof(hw_auth_token_t)) {
             LOG(ERROR) << "v21: unexpected HAT size " << auth->token.size()
